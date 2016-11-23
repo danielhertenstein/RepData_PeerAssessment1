@@ -1,22 +1,45 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
-output: 
+output:
   html_document:
     keep_md: true
 ---
 
 
 ## Loading and preprocessing the data
-
-
+```{r}
+activity <- read.csv(unz('activity.zip', 'activity.csv'))
+```
 
 ## What is mean total number of steps taken per day?
+```{r}
+library(dplyr)
+library(ggplot2)
+daily_steps <- activity %>% group_by(date) %>% summarize(steps=sum(steps, na.rm=TRUE))
+ggplot(subset(daily_steps, !is.na(steps)), aes(steps)) + 
+  geom_histogram(binwidth = 1000) + 
+  labs(x='Daily Steps', y='Frequency', title='Histogram of Daily Steps') + 
+  scale_y_continuous(breaks=0:10, minor_breaks=NULL) +
+  theme(plot.title = element_text(hjust=0.5))
+mean_steps <- mean(daily_steps$steps, na.rm=TRUE)
+median_steps <- median(daily_steps$steps, na.rm=TRUE)
+```
 
-
+The mean and median of the total number of steps taken per day are: `r mean_steps` and `r median_steps`, respectively.
 
 ## What is the average daily activity pattern?
-
-
+```{r}
+library(dplyr)
+library(ggplot2)
+interval_steps <- activity %>% group_by(interval) %>% summarize(steps=mean(steps, na.rm=TRUE))
+ggplot(interval_steps, aes(interval, steps)) + 
+  geom_line() +
+  labs(x='5-Minute Interval', 
+       y='Average Steps Per Day', 
+       title='Average Steps Per Day for Each 5-Minute Interval Throughout the Day') +
+  theme(plot.title = element_text(hjust=0.5))
+interval_steps$interval[which.max(interval_steps$steps)]
+```
 
 ## Imputing missing values
 
